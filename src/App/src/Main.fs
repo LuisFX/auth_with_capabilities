@@ -36,7 +36,13 @@ let capabilities =
 
         let getCustomerOnlyForSameId id (principal:User)  = 
             let accessToken = Authorization.onlyForSameId id principal
-            accessToken |> tokenToCap CustomerDatastore.getCustomer 
+            // MAXIME: The code below would fail to compile, because the AccessToken is of a different type, as expected.
+            // match accessToken with
+            // | Some token ->
+            //     Some (fun password -> CustomerDatastore.updatePassword token password)
+            // | None -> None
+            accessToken |> tokenToCap CustomerDatastore.getCustomer
+
 
         let getCustomerOnlyForAgentsInBusinessHours id (principal:User) = 
             let accessToken = Authorization.onlyForAgents id principal

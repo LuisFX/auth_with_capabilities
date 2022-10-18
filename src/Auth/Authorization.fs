@@ -10,7 +10,7 @@ module Authorization =
         // but do allow read access to the data
         member this.Data = this.data
 
-    let onlyForSameId (id:CustomerId) principal = 
+    let onlyForSameId (id:CustomerId) principal =
         if Authentication.customerIdOwnedByPrincipal id principal then
             Some {data=AccessCustomer id}
         else
