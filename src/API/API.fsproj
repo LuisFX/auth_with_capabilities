@@ -10,5 +10,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../Shared/Shared.fsproj" />
+    <ProjectReference Include="../Database/Database.fsproj" />
+    <ProjectReference Include="../Auth/Auth.fsproj" />
   </ItemGroup>
 </Project>

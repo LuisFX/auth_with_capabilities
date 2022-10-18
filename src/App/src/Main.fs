@@ -18,78 +18,79 @@ open API
 
 importSideEffects "./styles/global.scss"
 
-let capabilities = 
+// let capabilities = 
         
-        // apply the token, if present,
-        // to a function which has only the token as a parameter
-        let tokenToCap f token =
-            token 
-            |> Option.map (fun token -> 
-                fun () -> f token)
+//         // apply the token, if present,
+//         // to a function which has only the token as a parameter
+//         let tokenToCap f token =
+//             token 
+//             |> Option.map (fun token -> 
+//                 fun () -> f token)
 
-        // apply the token, if present,
-        // to a function which has the token and other parameters
-        let tokenToCap2 f token =
-            token 
-            |> Option.map (fun token -> 
-                fun x -> f token x)
+//         // apply the token, if present,
+//         // to a function which has the token and other parameters
+//         let tokenToCap2 f token =
+//             token 
+//             |> Option.map (fun token -> 
+//                 fun x -> f token x)
 
-        let getCustomerOnlyForSameId id (principal:User)  = 
-            let accessToken = Authorization.onlyForSameId id principal
-            // MAXIME: The code below would fail to compile, because the AccessToken is of a different type, as expected.
-            // match accessToken with
-            // | Some token ->
-            //     Some (fun password -> CustomerDatastore.updatePassword token password)
-            // | None -> None
-            accessToken |> tokenToCap CustomerDatastore.getCustomer
+//         let getCustomerOnlyForSameId id (principal:User)  = 
+//             let accessToken = Authorization.onlyForSameId id principal
+//             // MAXIME: The code below would fail to compile, because the AccessToken is of a different type, as expected.
+//             // match accessToken with
+//             // | Some token ->
+//             //     Some (fun password -> CustomerDatastore.updatePassword token password)
+//             // | None -> None
+//             accessToken |> tokenToCap CustomerDatastore.getCustomer
 
 
-        let getCustomerOnlyForAgentsInBusinessHours id (principal:User) = 
-            let accessToken = Authorization.onlyForAgents id principal
-            let cap1 = accessToken |> tokenToCap CustomerDatastore.getCustomer 
-            let restriction f = Authorization.onlyIfDuringBusinessHours (DateTime.Now) f
-            cap1 |> Authorization.restrict restriction 
+//         let getCustomerOnlyForAgentsInBusinessHours id (principal:User) = 
+//             let accessToken = Authorization.onlyForAgents id principal
+//             let cap1 = accessToken |> tokenToCap CustomerDatastore.getCustomer 
+//             let restriction f = Authorization.onlyIfDuringBusinessHours (DateTime.Now) f
+//             cap1 |> Authorization.restrict restriction 
 
-        let getCustomerOnlyForSameId_OrForAgentsInBusinessHours id (principal:User) = 
-            let cap1 = getCustomerOnlyForSameId id principal 
-            let cap2 = getCustomerOnlyForAgentsInBusinessHours id principal 
-            Authorization.first [cap1; cap2]
+//         let getCustomerOnlyForSameId_OrForAgentsInBusinessHours id (principal:User) = 
+//             let cap1 = getCustomerOnlyForSameId id principal 
+//             let cap2 = getCustomerOnlyForAgentsInBusinessHours id principal 
+//             Authorization.first [cap1; cap2]
 
-        let updateCustomerOnlyForSameId id principal = 
-            let accessToken = Authorization.onlyForSameId id (principal:User)
-            accessToken |> tokenToCap2 CustomerDatastore.updateCustomer
+//         let updateCustomerOnlyForSameId id principal = 
+//             let accessToken = Authorization.onlyForSameId id (principal:User)
+//             accessToken |> tokenToCap2 CustomerDatastore.updateCustomer
 
-        let updateCustomerOnlyForAgentsInBusinessHours id principal = 
-            let accessToken = Authorization.onlyForAgents id principal
-            let cap1 = accessToken |> tokenToCap2 CustomerDatastore.updateCustomer
-            // uncomment to get the restriction
-            let restriction f = Authorization.onlyIfDuringBusinessHours (DateTime.Now) f // with restriction
-            // let restriction = Some  // no restriction
-            cap1 |> Authorization.restrict restriction 
+//         let updateCustomerOnlyForAgentsInBusinessHours id principal = 
+//             let accessToken = Authorization.onlyForAgents id principal
+//             let cap1 = accessToken |> tokenToCap2 CustomerDatastore.updateCustomer
+//             // uncomment to get the restriction
+//             let restriction f = Authorization.onlyIfDuringBusinessHours (DateTime.Now) f // with restriction
+//             // let restriction = Some  // no restriction
+//             cap1 |> Authorization.restrict restriction 
 
-        let updateCustomerOnlyForSameId_OrForAgentsInBusinessHours id (principal:User) = 
-            let cap1 = updateCustomerOnlyForSameId id principal 
-            let cap2 = updateCustomerOnlyForAgentsInBusinessHours id principal 
-            Authorization.first [cap1; cap2]
+//         let updateCustomerOnlyForSameId_OrForAgentsInBusinessHours id (principal:User) = 
+//             let cap1 = updateCustomerOnlyForSameId id principal 
+//             let cap2 = updateCustomerOnlyForAgentsInBusinessHours id principal 
+//             Authorization.first [cap1; cap2]
 
-        let updatePasswordOnlyForSameId id (principal:User) = 
-            let accessToken = Authorization.passwordUpdate id principal
-            let cap = accessToken |> tokenToCap2 CustomerDatastore.updatePassword
-            cap 
-            |> Option.map (Authorization.auditable "UpdatePassword" principal.Name) 
+//         let updatePasswordOnlyForSameId id (principal:User) = 
+//             let accessToken = Authorization.passwordUpdate id principal
+//             let cap = accessToken |> tokenToCap2 CustomerDatastore.updatePassword
+//             cap 
+//             |> Option.map (Authorization.auditable "UpdatePassword" principal.Name) 
 
-        // create the record that contains the capabilities
-        {
-            getCustomer = getCustomerOnlyForSameId_OrForAgentsInBusinessHours 
-            updateCustomer = updateCustomerOnlyForSameId_OrForAgentsInBusinessHours 
-            updatePassword = updatePasswordOnlyForSameId 
-        }
+//         // create the record that contains the capabilities
+//         let a = {
+//             getCustomer = getCustomerOnlyForSameId_OrForAgentsInBusinessHours 
+//             updateCustomer = updateCustomerOnlyForSameId_OrForAgentsInBusinessHours 
+//             updatePassword = updatePasswordOnlyForSameId 
+//         }
+//         a
 
-let getAvailableCapabilities capabilityProvider customerId principal = 
-    let getCustomer = capabilityProvider.getCustomer customerId principal 
-    let updateCustomer = capabilityProvider.updateCustomer customerId principal 
-    let updatePassword = capabilityProvider.updatePassword customerId principal 
-    getCustomer,updateCustomer,updatePassword
+// let getAvailableCapabilities capabilityProvider customerId principal = 
+//     let getCustomer = capabilityProvider.getCustomer customerId principal 
+//     let updateCustomer = capabilityProvider.updateCustomer customerId principal 
+//     let updatePassword = capabilityProvider.updatePassword customerId principal 
+//     getCustomer,updateCustomer,updatePassword
 
 type Msg =
     | Login of string * string
@@ -106,7 +107,7 @@ type CurrentState =
         
 let init() = LoggedOut, Cmd.none
 
-let update capabilityProvider msg state =
+let update msg state =
     match msg with
     | Logout ->
         LoggedOut, Cmd.none
@@ -143,7 +144,7 @@ let update capabilityProvider msg state =
 
 [<ReactComponent>]
 let App() =
-    let state, dispatch = React.useElmish(init, update capabilities, [| |])
+    let state, dispatch = React.useElmish(init, update, [| |])
     match state with
     | LoggedOut ->
             Html.div [
@@ -187,8 +188,8 @@ let App() =
         ]
     | CustomerSelected (principal, customerId) ->
         // get the individual component capabilities from the provider
-        let getCustomerCap,updateCustomerCap,updatePasswordCap = 
-            getAvailableCapabilities capabilities customerId principal
+        let getCustomerCap,updateCustomerCap, updatePasswordCap = 
+            API.Capabilities.getAllCapabilities customerId principal
 
         // get the text for menu options based on capabilities that are present
         let menuOptionActions = 
