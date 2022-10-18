@@ -18,5 +18,6 @@
         <ProjectReference Include="../../Shared/Shared.fsproj" />
         <ProjectReference Include="../../Auth/Auth.fsproj" />
         <ProjectReference Include="../../Database/Database.fsproj" />
+        <ProjectReference Include="../../API/API.fsproj" />
   </ItemGroup>
 </Project>

@@ -6,7 +6,11 @@ module CustomerDatastore =
     open Shared.Capabilities
     open Auth.Authorization
 
-    let private db = Dictionary<CustomerId,CustomerData>()
+    let private db = 
+        let db = Dictionary<CustomerId,CustomerData>()
+        db.Add(CustomerId 1, CustomerData "Data for customer 1")
+        db.Add(CustomerId 2, CustomerData "Data for customer 2")
+        db
 
     let getCustomer (accessToken:AccessToken<AccessCustomer>) = 
         // get customer id

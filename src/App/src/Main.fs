@@ -13,6 +13,7 @@ open Auth
 open Shared.Types
 open Shared.Capabilities
 open Database
+open API
 
 
 importSideEffects "./styles/global.scss"
@@ -88,11 +89,13 @@ type Msg =
     | Login of string * string
     | Logout
     | SelectCustomer of User * string
+    | GetCustomerDetails of GetCustomerCap option 
 
 type CurrentState = 
     | LoggedOut
     | LoggedIn of User
     | CustomerSelected of User * CustomerId
+    | GotCustomerDetails of CustomerData
     | Exit
         
 let init() = LoggedOut, Cmd.none
@@ -116,8 +119,21 @@ let update capabilityProvider msg state =
             | Error err -> 
                 // not found -- stay in originalState 
                 printfn ".. %A" err
-                state, Cmd.none 
-    // | Decrement -> { state with Count = state.Count - 1 }, Cmd.none
+                state, Cmd.none
+    | GetCustomerDetails getCustomerCap ->
+            let r =
+                match getCustomerCap with
+                | Some cap ->
+                    BusinessServices.getCustomer cap
+                | None ->
+                    failwith "Not authorized for this capability"
+            match r with
+            | Ok d -> 
+                GotCustomerDetails d, Cmd.none
+            | Error err -> 
+                printfn ".. %A" err
+                state, Cmd.none
+            
 
 [<ReactComponent>]
 let App() =
@@ -171,7 +187,7 @@ let App() =
         // get the text for menu options based on capabilities that are present
         let menuOptionActions = 
             [
-                getCustomerCap |> Option.map (fun _ -> Html.button [ prop.text "Get"; prop.onClick (fun _ -> printfn "Get") ] )
+                getCustomerCap |> Option.map (fun _ -> Html.button [ prop.text "Get"; prop.onClick (fun _ -> GetCustomerDetails getCustomerCap |> dispatch) ] )
                 updateCustomerCap |> Option.map (fun _ -> Html.button [ prop.text "Update Customer"; prop.onClick (fun _ -> printfn "Update Customer") ] )
                 updatePasswordCap |> Option.map (fun _ -> Html.button [ prop.text "Update Password"; prop.onClick (fun _ -> printfn "Update Password") ] )
             ] 
@@ -192,6 +208,8 @@ let App() =
                 prop.onClick (fun _ -> Logout |> dispatch)
             ]
         ]
+    | GotCustomerDetails d ->
+        Html.div (sprintf "Got customer details: %A" d)
 
 [<EntryPoint>]
 ReactDOM.render(
